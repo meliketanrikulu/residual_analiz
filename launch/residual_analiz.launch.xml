@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="residual_analiz" exec="residual_analiz" name="residual_analiz" output="screen" />
+
+</launch>
