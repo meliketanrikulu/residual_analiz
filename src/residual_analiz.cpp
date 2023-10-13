@@ -57,8 +57,13 @@ void ResidualAnaliz::testCallback(const geometry_msgs::msg::PoseStamped::ConstSh
 
     double roll_difference_in_radians  = abs(roll_twist_only_ - roll_aw_);
     double pitch_difference_in_radians = abs(pitch_twist_only_ - pitch_aw_);
-    double yaw_difference_in_radians   = abs(yaw_twist_only_ - yaw_aw_);
-
+    double yaw_difference_in_radians;
+    if ((yaw_twist_only_ > 1.5708 && yaw_aw_ < -1.5708) ||  (yaw_twist_only_ < -1.5708 && yaw_aw_ > 1.5708)){
+        yaw_difference_in_radians = 6.28319 - abs(yaw_twist_only_ - yaw_aw_);
+    }
+    else {
+        yaw_difference_in_radians = abs(yaw_twist_only_ - yaw_aw_);
+    }
     ekf_with_only_twist.pose.covariance[21] = std::pow(roll_difference_in_radians, 2);
     ekf_with_only_twist.pose.covariance[28] = std::pow(pitch_difference_in_radians, 2);
     ekf_with_only_twist.pose.covariance[35] = std::pow(yaw_difference_in_radians, 2);
@@ -67,12 +72,13 @@ void ResidualAnaliz::testCallback(const geometry_msgs::msg::PoseStamped::ConstSh
 
     auto difference_ = std::make_unique<std_msgs::msg::Float64MultiArray>();
 
-    difference_->data = {position_difference_x,position_difference_y,position_difference_z,(yaw_difference_in_radians * 2 * M_PI)};
-//    std_msgs::msg::Float64MultiArray difference_;
-//    difference_.data[0] = position_difference_x;
-//    difference_.data[1] = position_difference_y;
-//    difference_.data[2] = position_difference_z;
-//    difference_.data[3] = yaw_difference_in_radians;
+    difference_->data = {position_difference_x,position_difference_y,position_difference_z,(yaw_difference_in_radians * 180 / M_PI)};
+    if((yaw_difference_in_radians * 180 / M_PI) >= 300.0){
+        std::cout<<"yaw_twist_only_ : "<<yaw_twist_only_ * 180 / M_PI <<std::endl;
+        std::cout<<"yaw_aw_ : "<<yaw_aw_ * 180 / M_PI <<std::endl;
+        std::cout<<"yaw_difference_in_radians : : : "<<yaw_difference_in_radians<<std::endl;
+    }
+
 
     pub_difference_xyz_yaw->publish(std::move(difference_));
 
