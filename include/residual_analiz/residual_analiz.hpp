@@ -20,28 +20,33 @@ class ResidualAnaliz : public rclcpp::Node {
 public:
     ResidualAnaliz();
     using pose_msg = geometry_msgs::msg::PoseStamped;
-    using ExactTimeSyncPolicy = message_filters::sync_policies::ApproximateTime<pose_msg, pose_msg,pose_msg>;
+    using ExactTimeSyncPolicy = message_filters::sync_policies::ApproximateTime<pose_msg, pose_msg,pose_msg, pose_msg>;
     using ExactTimeSynchronizer = message_filters::Synchronizer<ExactTimeSyncPolicy>;
     std::shared_ptr<ExactTimeSynchronizer> sync_ptr_;
 
     message_filters::Subscriber<pose_msg> sub_ekf_dr_1_;
     message_filters::Subscriber<pose_msg> sub_aw_ekf_sync;
     message_filters::Subscriber<pose_msg> sub_ekf_dr_2_;
+    message_filters::Subscriber<pose_msg> sub_gnss_sync_;
 
 
 
 private:
-    void testCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr & in_aw_ekf_msg,
+    void testCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr & in_aw_ekf_msg_,
                       const geometry_msgs::msg::PoseStamped::ConstSharedPtr & in_ekf_dr_1_,
-                      const geometry_msgs::msg::PoseStamped::ConstSharedPtr & in_ekf_dr_2_) ;
+                      const geometry_msgs::msg::PoseStamped::ConstSharedPtr & in_ekf_dr_2_,
+                      const geometry_msgs::msg::PoseStamped::ConstSharedPtr & in_gnss_msg_) ;
 
 
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pub_pose_with_only_dr1;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pub_pose_with_with_dr2;
+    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pub_pose_with_with_gtruth;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub_absolute_error_dr1;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub_absolute_error_dr2;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub_absolute_error_gtruth;
     rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr pub_difference_dr1_xyz_yaw;
     rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr pub_difference_dr2_xyz_yaw;
+    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr pub_difference_gtruth_xyz_yaw;
 
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_ndt_status;
 
